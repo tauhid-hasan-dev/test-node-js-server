@@ -21,12 +21,35 @@ const users = [
 
 const uri = "mongodb+srv://dbUser2:WAP4KDVKgS3EhEYT@cluster0.jjvuikj.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-client.connect(err => {
-    const collection = client.db("testserver").collection("users");
-    // perform actions on the collection object
-    console.log('database connected');
-    client.close();
-});
+
+const run = async () => {
+    try {
+        const userCollection = client.db('testnode').collection('users')
+        /*  const user = { name: 'kulsum', email: 'kulsum@gmail.com' } */
+        /* const result = await userCollection.insertOne(user);
+        console.log(result) */
+
+        app.post('/users', async (req, res) => {
+            console.log('api hitted');
+            //this is the user coming from the user request
+            const user = req.body;
+            //result variable inserting a user into userCollection(mongodb)
+            const result = await userCollection.insertOne(user);
+            console.log(result)
+            //we setting the id of the new user from the result id
+            user.id = result.insertedId;
+            /*after store data in database.if we want to send this data to the ui we need to
+            this data with res.send(user) to be updated in the ui
+            */
+            res.send(user);
+        })
+    }
+    finally {
+
+    }
+}
+
+run().catch(e => console.log(e))
 
 
 app.get('/', (req, res) => {
@@ -44,14 +67,14 @@ app.get('/users', (req, res) => {
     }
 })
 
-app.post('/users', (req, res) => {
+/* app.post('/users', (req, res) => {
     console.log('api hitted');
     const user = req.body;
     user.id = users.length + 1;
     users.push(user);
     res.send(user);
     console.log(user);
-})
+}) */
 
 app.listen(port, () => {
     console.log(`This app is running on port${port}`)
